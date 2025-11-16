@@ -1,0 +1,232 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <locale.h> // Biblioteca que permite usar o português com caracteres acentuados
+
+
+#define LINHAS 3
+#define COLUNAS 3
+
+
+char jogador_1 = 'X', jogador_2 = 'O'; //Declaração dos jogadores//
+char tabuleiro [LINHAS][COLUNAS]; //Declaração do tabuleiro 3x3 //
+
+
+//Função de limpar tela a ser desenvolvida, para deixar o jogo mais organizado visualmente//
+void limpar_tela() {
+    system("cls");
+}
+
+
+//Função para iniciar o tabuleiro
+void inicializa_tabuleiro () {
+    for (int i = 0; i < LINHAS; i++){
+        for (int j = 0; j < COLUNAS; j++){
+            tabuleiro[i][j] = ' '; //Preenche a matriz com caractere neutro que representa um espaço vazio//
+        }
+    }
+}
+
+
+// Imprime um tabuleiro de 1 a 9 na tela para que os jogadores escolham a posição para sua jogado.
+void imprime_tabuleiro() {
+    printf("\n Escolha um número do tabuleiro para posicionar sua jogada:\n\n");
+    for (int i = 0; i < LINHAS; i++) {
+        printf("     ");
+        for (int j = 0; j < COLUNAS; j++) {
+            int num_pos = i * 3 + j + 1;
+            if (tabuleiro[i][j] == ' ')
+                printf(" %d ", num_pos); // Imprime o número para escolha
+            else
+                printf(" %c ", tabuleiro[i][j]); // Imprime o símbolo preenchido
+
+
+            if (j < COLUNAS - 1)
+                printf("|");
+        }
+        printf("\n");
+        if (i < LINHAS - 1)
+            printf("     ---|---|---\n");
+    }
+    printf("\n");
+}
+
+
+//Função para verificar se alguém já venceu o jogo
+char verifica_vitoria_ou_empate() {
+
+
+    // Verifica as linhas e colunas e retorna o simbólo que está nos espaços iguais(o de vitória)
+    for (int i = 0; i < LINHAS; i++) {
+
+
+        // Linhas
+        if (tabuleiro[i][0] != ' ' &&
+            tabuleiro[i][0] == tabuleiro[i][1] &&
+            tabuleiro[i][1] == tabuleiro[i][2]) {
+            return tabuleiro[i][0];
+        }
+        // Colunas
+        if (tabuleiro[0][i] != ' ' &&
+            tabuleiro[0][i] == tabuleiro[1][i] &&
+            tabuleiro[1][i] == tabuleiro[2][i]) {
+            return tabuleiro[0][i];
+        }
+    }
+
+
+    // Verifica as diagonais
+    if (tabuleiro[0][0] != ' ' &&
+        tabuleiro[0][0] == tabuleiro[1][1] &&
+        tabuleiro[1][1] == tabuleiro[2][2]) {
+        return tabuleiro[0][0];
+    }
+    if (tabuleiro[0][2] != ' ' &&
+        tabuleiro[0][2] == tabuleiro[1][1] &&
+        tabuleiro[1][1] == tabuleiro[2][0]) {
+        return tabuleiro[0][2];
+    }
+
+
+    // Verifica empate (todas as posições preenchidas)
+    int preenchido = 1; //Assume que o tabuleiro já está preenchido, ou seja, preenchido é verdadeiro
+    for (int i = 0; i < LINHAS; i++) {
+        for (int j = 0; j < COLUNAS; j++) {
+            if (tabuleiro[i][j] == ' ') {
+                preenchido = 0; // Percorre as linhas e colunas e retorna falso para preenchido se encontrar um espaço vazio
+            }
+        }
+    }
+    if (preenchido) {
+        return 'E'; // Se preenchido for verdadeiro o jogo empata
+    }
+    return ' '; //Retorna um espaço vazio se nenhum jogador venceu e se ainda existem casas vazias no tabuleiro. O Jogo continua
+}
+
+
+// Função para verificar se uma jogada é válida
+int jogada_valida(int posicao) {
+    if (posicao < 1 || posicao > 9) {
+        return 0; // Número não existente no tabuleiro
+    }
+    int linha = (posicao - 1) / 3;
+    int coluna = (posicao - 1) % 3;
+    if (tabuleiro[linha][coluna] != ' ') {
+        return 0; // Posição escolhida ocupada
+    }
+    return 1; // Retorna verdadeiro para jogada válida
+}
+
+
+// Função para atualizar o tabuleiro com as respostas dos jogadores
+void atualiza_tabuleiro(int pos, char simbolo) {
+    int linha = (pos - 1) / 3;
+    int coluna = (pos - 1) % 3;
+    tabuleiro[linha][coluna] = simbolo;
+}
+
+
+
+
+int main() {
+    setlocale(LC_ALL, "Portuguese");//Define o idioma para o português (pode variar de acordo com o sistema operacional)
+
+
+    char jogar_novamente;
+
+
+    do {
+        inicializa_tabuleiro();
+
+
+        char resultado = ' '; // Variável para alocar o vencedor
+        int rodada = 0; // Variável para contar o número de rodadas
+        int jogador_atual = 0; // 0 para X e 1 para O
+
+
+        //Loop de jogada
+        while (resultado == ' ' && rodada < 9) {
+
+
+            limpar_tela();
+
+
+            printf("==============================\n");
+            printf("    JOGO DA VELHA EM C\n");
+            printf("==============================\n");
+
+
+            imprime_tabuleiro();
+
+
+            int posicao, jogada_ok = 0;
+
+
+            do {
+                if (jogador_atual == 0) //Se for o jogador X
+                    printf("Jogador %c, é a sua vez de jogar: ", jogador_1);
+                else//Se for o jogador O
+                    printf("Jogador %c, é a sua vez de jogar: ", jogador_2);
+
+
+                scanf("%d", &posicao);// Lê posição da escolhida
+
+
+                jogada_ok = jogada_valida(posicao);// Verifica se a jogada foi válida
+
+
+                if (!jogada_ok) {// Se a jogada não foi válida
+                    printf("\n Opa! Essa posição é inválida ou já está ocupada, tente outra!\n");
+                }
+            } while (!jogada_ok);
+
+
+        // Atualiza a matriz com o símbolo do jogador atual
+        if (jogador_atual == 0)
+            atualiza_tabuleiro(posicao, jogador_1);//Guarda respostas do Jogador X na mmatriz
+        else
+            atualiza_tabuleiro(posicao, jogador_2);//Guarda respostas do Jogador O na mmatriz
+
+
+        // Verifica vitória ou empate após a jogada
+        resultado = verifica_vitoria_ou_empate();
+
+
+        // Troca o jogador
+        jogador_atual = 1 - jogador_atual;
+        rodada++;
+        }
+
+
+        // Exibe o tabuleiro com o resultado
+        limpar_tela();
+        printf("==============================\n");
+        printf("      FIM DO JOGO\n");
+        printf("==============================\n");
+        imprime_tabuleiro();
+
+
+        if (resultado == 'X' || resultado == 'O') {
+            printf("\n PARABÉNS! Jogador %c, você ganhou o jogo!\n", resultado);
+        } else if (resultado == 'E') {
+            printf("\n Xiii.. O jogo terminou em empate.\n");
+        }
+        // --- FIM DO JOGO ---
+
+
+        while (getchar() != '\n');
+
+
+        printf("\n\nDeseja jogar novamente? (Digite S para sim e N para não.): ");
+        scanf(" %c", &jogar_novamente);
+
+
+    } while (jogar_novamente == 'S' || jogar_novamente == 's'); // O loop se repete se a resposta for 'S' ou 's'
+
+
+    printf("\nObrigado por jogar! Até a próxima.\n");
+
+
+    return 0;
+}
+
+
